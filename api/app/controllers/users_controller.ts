@@ -1,6 +1,5 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import User from '#models/user'
-import hash from '@adonisjs/core/services/hash'
 
 export default class UsersController {
   /**
@@ -16,10 +15,7 @@ export default class UsersController {
     }
 
     // Crée un nouvel utilisateur
-    const user = await User.create({
-      ...data,
-      password: await hash.make(data.password),
-    })
+    const user = await User.create(data)
 
     return response.created({
       message: 'Utilisateur créé avec succès',
@@ -35,9 +31,9 @@ export default class UsersController {
 
     try {
       // Vérification directe grâce à withAuthFinder
-      const user = await User.verifyCredentials(email, password)
-
-      // Génération du token API
+      
+      const user = User.verifyCredentials(email, password) as unknown as User
+       // Génération du token API
       const token = await auth.use('api').createToken(user)
 
       return response.ok({ message: 'Connexion réussie', token, user })
